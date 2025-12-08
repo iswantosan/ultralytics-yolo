@@ -47,3 +47,4 @@ head:
 
   - [[17, 19, 22], 1, Detect, [nc]] # Detect(P2, P3, P4)
   # Improved architecture for higher mAP
+  # tag: 0.87311
