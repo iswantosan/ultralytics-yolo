@@ -22,14 +22,12 @@ backbone:
   - [-1, 5, A2C2f, [512, True, 4]] # 6 - Increased repeats from 4 to 5
   - [-1, 1, Conv, [1024, 3, 2]] # 7-P5/32
   - [-1, 5, A2C2f, [1024, True, 1]] # 8 - Increased repeats from 4 to 5
-  - [-1, 1, SPPF, [1024, 5]] # 9 - Spatial Pyramid Pooling Fast untuk multi-scale features
 
 # YOLO12n head
 head:
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
   - [[-1, 6], 1, Concat, [1]] # cat backbone P4
   - [-1, 4, A2C2f, [512, False, 1, False, 2.0, 0.5]] # 10 - c2=512, e=0.5 -> c_=256 (multiple of 32) ✓
-  - [-1, 1, SPPF, [512, 5]] # 11 - Added SPPF for multi-scale features in head
 
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
   - [[-1, 4], 1, Concat, [1]] # cat backbone P3
@@ -40,12 +38,12 @@ head:
   - [-1, 4, A2C2f, [128, False, 1, False, 2.0, 0.5]] # 17 - c2=128, e=0.5 -> c_=64 (multiple of 32) ✓
 
   - [-1, 1, Conv, [128, 3, 2]]
-  - [[-1, 16], 1, Concat, [1]] # cat head P3 (updated after SPPF addition)
-  - [-1, 4, A2C2f, [256, False, 1, False, 2.0, 0.5]] # 20 - c2=256, e=0.5 -> c_=128 (multiple of 32) ✓
+  - [[-1, 14], 1, Concat, [1]] # cat head P3
+  - [-1, 4, A2C2f, [256, False, 1, False, 2.0, 0.5]] # 19 - c2=256, e=0.5 -> c_=128 (multiple of 32) ✓
 
   - [-1, 1, Conv, [256, 3, 2]]
-  - [[-1, 13], 1, Concat, [1]] # cat head P4 (after SPPF for better features)
-  - [-1, 4, A2C2f, [512, False, 1, False, 2.0, 0.5]] # 23 - c2=512, e=0.5 -> c_=256 (multiple of 32) ✓
+  - [[-1, 10], 1, Concat, [1]] # cat head P4
+  - [-1, 2, C3k2, [512, True]] # 22 - Using C3k2 for final bottom-up layer (P4/16-large) like obb/seg pattern
 
-  - [[19, 22, 25], 1, Detect, [nc]] # Detect(P2, P3, P4) - updated layer indices
+  - [[17, 19, 22], 1, Detect, [nc]] # Detect(P2, P3, P4)
   # Improved architecture for higher mAP
