@@ -54,6 +54,8 @@ backbone:
   - [-1, 1, Conv, [1024, 3, 2]] # 7-P5/32
   # Baris 28: Layer 8: A2C2f module dengan 1024 channel, diulang 4 kali, dengan parameter True dan 1
   - [-1, 4, A2C2f, [1024, True, 1]] # 8
+  # Baris 28a: Layer 8a: SPPF module untuk meningkatkan feature extraction dengan spatial pyramid pooling
+  - [-1, 1, SPPF, [1024, 5]] # 8a-SPPF untuk meningkatkan mAP
 
 # Baris 29: Baris kosong untuk pemisah
 # Baris 30: Komentar header untuk bagian head YOLO12n (detection head)
@@ -64,34 +66,34 @@ head:
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
   # Baris 33: Layer 10: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 6 dari backbone (P4)
   - [[-1, 6], 1, Concat, [1]] # cat backbone P4
-  # Baris 34: Layer 11: A2C2f module dengan 512 channel, diulang 2 kali, dengan parameter True dan -1
-  - [-1, 3, A2C2f, [512, True, -1]] # 11
+  # Baris 34: Layer 11: C2fPSA module dengan attention mechanism untuk meningkatkan mAP
+  - [-1, 3, C2fPSA, [512, 0.5]] # 11-C2fPSA dengan PSA attention (c2=512, n=3 dari repeats, e=0.5)
 
   # Baris 35: Baris kosong untuk pemisah
   # Baris 36: Layer 12: Upsampling layer lagi dengan scale factor 2 untuk meningkatkan resolusi lebih lanjut
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
   # Baris 37: Layer 13: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 4 dari backbone (P3)
   - [[-1, 4], 1, Concat, [1]] # cat backbone P3
-  # Baris 38: Layer 14: A2C2f module dengan 512 channel, diulang 2 kali - ini adalah output P3 untuk deteksi objek kecil
-  - [-1, 3, A2C2f, [512, True, -1]] # 14
+  # Baris 38: Layer 14: C2fPSA module dengan attention mechanism untuk deteksi objek kecil - meningkatkan mAP
+  - [-1, 3, C2fPSA, [512, 0.5]] # 14-C2fPSA untuk P3 output (c2=512, n=3 dari repeats, e=0.5)
 
   # Baris 39: Baris kosong untuk pemisah
   # Baris 40: Layer 15: Conv layer dengan 256 channel, kernel 3x3, stride 2 untuk downsample (path ke P4)
   - [-1, 1, Conv, [256, 3, 2]]
   # Baris 41: Layer 16: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 11 (P4 dari head)
   - [[-1, 11], 1, Concat, [1]] # cat head P4 =>
-  # Baris 42: Layer 17: A2C2f module dengan 512 channel, diulang 2 kali - ini adalah output P4 untuk deteksi objek sedang
-  - [-1, 3, A2C2f, [512, True, -1]] # 17
+  # Baris 42: Layer 17: C2fPSA module dengan attention mechanism untuk deteksi objek sedang - meningkatkan mAP
+  - [-1, 3, C2fPSA, [512, 0.5]] # 17-C2fPSA untuk P4 output (c2=512, n=3 dari repeats, e=0.5)
 
   # Baris 43: Baris kosong untuk pemisah
   # Baris 44: Layer 18: Conv layer dengan 512 channel, kernel 3x3, stride 2 untuk downsample (path ke P5)
   - [-1, 1, Conv, [512, 3, 2]]
-  # Baris 45: Layer 19: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 8 dari backbone (P5)
-  - [[-1, 8], 1, Concat, [1]] # cat head P5
+  # Baris 45: Layer 19: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 8 dari backbone (P5 dengan SPPF)
+  - [[-1, 8], 1, Concat, [1]] # cat head P5 (layer 8 adalah A2C2f, SPPF adalah layer terakhir backbone)
   # Baris 46: Komentar pertanyaan tentang penggunaan C3k2 setelah A2C2f
   # disini taruh a2c2f baru c3k2 aneh tidak?
-  # Baris 47: Layer 20: C3k2 module dengan 1024 channel, diulang 2 kali - ini adalah output P5 untuk deteksi objek besar
-  - [-1, 4, C3k2, [1024, True]] # 20 (P5/32-large)
+  # Baris 47: Layer 20: C2fPSA module dengan attention mechanism untuk deteksi objek besar - meningkatkan mAP
+  - [-1, 4, C2fPSA, [1024, 0.5]] # 20-C2fPSA untuk P5/32-large output (c2=1024, n=4 dari repeats, e=0.5)
 
   # Baris 48: Baris kosong untuk pemisah
   # Baris 49: Layer 21: Detect layer yang mengambil output dari layer 14 (P3), 17 (P4), dan 20 (P5) untuk deteksi multi-scale
