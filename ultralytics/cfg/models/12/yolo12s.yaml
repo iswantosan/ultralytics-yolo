@@ -1,52 +1,104 @@
+# Baris 1: Header lisensi Ultralytics dengan link ke halaman lisensi AGPL-3.0
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
+# Baris 2: Baris kosong untuk pemisah
+# Baris 3: Komentar menjelaskan bahwa ini adalah model YOLO12 untuk object detection dengan output di P3/8 sampai P5/32
 # YOLO12 object detection model with P3/8 - P5/32 outputs
+# Baris 4: Link dokumentasi model YOLO12
 # Model docs: https://docs.ultralytics.com/models/yolo12
+# Baris 5: Link dokumentasi task detection
 # Task docs: https://docs.ultralytics.com/tasks/detect
 
+# Baris 6: Baris kosong untuk pemisah
+# Baris 7: Komentar header untuk bagian Parameters
 # Parameters
+# Baris 8: nc = number of classes, jumlah kelas yang bisa dideteksi (80 kelas standar COCO dataset)
 nc: 80 # number of classes
+# Baris 9: scales = konstanta scaling untuk compound scaling model, digunakan untuk membuat varian model (n, s, m, l, x)
 scales: # model compound scaling constants, i.e. 'model=yolo12n.yaml' will call yolo12.yaml with scale 'n'
+  # Baris 10: Komentar menjelaskan format array: [depth multiplier, width multiplier, max_channels]
   # [depth, width, max_channels]
+  # Baris 11: Scale 'n' (nano): depth=0.50, width=0.25, max_channels=1024 - model terkecil dengan 272 layer, 2.6M parameter, 6.7 GFLOPs
   n: [0.50, 0.25, 1024] # summary: 272 layers, 2,602,288 parameters, 2,602,272 gradients, 6.7 GFLOPs
+  # Baris 12: Scale 's' (small): depth=0.50, width=0.50, max_channels=1024 - model kecil dengan 272 layer, 9.3M parameter, 21.7 GFLOPs
   s: [0.50, 0.50, 1024] # summary: 272 layers, 9,284,096 parameters, 9,284,080 gradients, 21.7 GFLOPs
+  # Baris 13: Scale 'm' (medium): depth=0.50, width=1.00, max_channels=512 - model sedang dengan 292 layer, 20.2M parameter, 68.1 GFLOPs
   m: [0.50, 1.00, 512] # summary: 292 layers, 20,199,168 parameters, 20,199,152 gradients, 68.1 GFLOPs
+  # Baris 14: Scale 'l' (large): depth=1.00, width=1.00, max_channels=512 - model besar dengan 488 layer, 26.5M parameter, 89.7 GFLOPs
   l: [1.00, 1.00, 512] # summary: 488 layers, 26,450,784 parameters, 26,450,768 gradients, 89.7 GFLOPs
+  # Baris 15: Scale 'x' (xlarge): depth=1.00, width=1.50, max_channels=512 - model terbesar dengan 488 layer, 59.2M parameter, 200.3 GFLOPs
   x: [1.00, 1.50, 512] # summary: 488 layers, 59,210,784 parameters, 59,210,768 gradients, 200.3 GFLOPs
 
+# Baris 16: Baris kosong untuk pemisah
+# Baris 17: Komentar header untuk bagian backbone YOLO12n
 # YOLO12n backbone
+# Baris 18: Mendefinisikan bagian backbone (feature extractor) dari model
 backbone:
+  # Baris 19: Komentar menjelaskan format: [from layer index, jumlah repeat, nama module, argumen]
   # [from, repeats, module, args]
+  # Baris 20: Layer 0: Conv layer dengan 64 channel, kernel 3x3, stride 2 - output P1/2 (downsample 2x dari input)
   - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
+  # Baris 21: Layer 1: Conv layer dengan 128 channel, kernel 3x3, stride 2 - output P2/4 (downsample 4x dari input)
   - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4
-  - [-1, 2, C3k2, [256, True, 0.25]]
+  # Baris 22: Layer 2: C3k2 module dengan 256 channel, diulang 2 kali, dengan parameter True dan 0.25
+  - [-1, 4, C3k2, [256, True, 0.25]]
+  # Baris 23: Layer 3: Conv layer dengan 256 channel, kernel 3x3, stride 2 - output P3/8 (downsample 8x dari input)
   - [-1, 1, Conv, [256, 3, 2]] # 3-P3/8
-  - [-1, 2, C3k2, [512, True, 0.25]]
+  # Baris 24: Layer 4: C3k2 module dengan 512 channel, diulang 2 kali, dengan parameter True dan 0.25
+  - [-1, 4, C3k2, [512, True, 0.25]]
+  # Baris 25: Layer 5: Conv layer dengan 512 channel, kernel 3x3, stride 2 - output P4/16 (downsample 16x dari input)
   - [-1, 1, Conv, [512, 3, 2]] # 5-P4/16
+  # Baris 26: Layer 6: A2C2f module dengan 512 channel, diulang 4 kali, dengan parameter True dan 4
   - [-1, 4, A2C2f, [512, True, 4]]
+  # Baris 27: Layer 7: Conv layer dengan 1024 channel, kernel 3x3, stride 2 - output P5/32 (downsample 32x dari input)
   - [-1, 1, Conv, [1024, 3, 2]] # 7-P5/32
+  # Baris 28: Layer 8: A2C2f module dengan 1024 channel, diulang 4 kali, dengan parameter True dan 1
   - [-1, 4, A2C2f, [1024, True, 1]] # 8
 
+# Baris 29: Baris kosong untuk pemisah
+# Baris 30: Komentar header untuk bagian head YOLO12n (detection head)
 # YOLO12n head
+# Baris 31: Mendefinisikan bagian head (detection head) dari model
 head:
+  # Baris 32: Layer 9: Upsampling layer dengan scale factor 2, menggunakan metode nearest neighbor untuk meningkatkan resolusi
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  # Baris 33: Layer 10: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 6 dari backbone (P4)
   - [[-1, 6], 1, Concat, [1]] # cat backbone P4
-  - [-1, 2, A2C2f, [512, True, -1]] # 11
+  # Baris 34: Layer 11: A2C2f module dengan 512 channel, diulang 2 kali, dengan parameter True dan -1
+  - [-1, 3, A2C2f, [512, True, -1]] # 11
 
+  # Baris 35: Baris kosong untuk pemisah
+  # Baris 36: Layer 12: Upsampling layer lagi dengan scale factor 2 untuk meningkatkan resolusi lebih lanjut
   - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  # Baris 37: Layer 13: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 4 dari backbone (P3)
   - [[-1, 4], 1, Concat, [1]] # cat backbone P3
-  - [-1, 2, A2C2f, [512, True, -1]] # 14
+  # Baris 38: Layer 14: A2C2f module dengan 512 channel, diulang 2 kali - ini adalah output P3 untuk deteksi objek kecil
+  - [-1, 3, A2C2f, [512, True, -1]] # 14
 
+  # Baris 39: Baris kosong untuk pemisah
+  # Baris 40: Layer 15: Conv layer dengan 256 channel, kernel 3x3, stride 2 untuk downsample (path ke P4)
   - [-1, 1, Conv, [256, 3, 2]]
+  # Baris 41: Layer 16: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 11 (P4 dari head)
   - [[-1, 11], 1, Concat, [1]] # cat head P4 =>
-  - [-1, 2, A2C2f, [512, True, -1]] # 17
+  # Baris 42: Layer 17: A2C2f module dengan 512 channel, diulang 2 kali - ini adalah output P4 untuk deteksi objek sedang
+  - [-1, 3, A2C2f, [512, True, -1]] # 17
 
+  # Baris 43: Baris kosong untuk pemisah
+  # Baris 44: Layer 18: Conv layer dengan 512 channel, kernel 3x3, stride 2 untuk downsample (path ke P5)
   - [-1, 1, Conv, [512, 3, 2]]
+  # Baris 45: Layer 19: Concat layer menggabungkan output layer sebelumnya (-1) dengan layer 8 dari backbone (P5)
   - [[-1, 8], 1, Concat, [1]] # cat head P5
+  # Baris 46: Komentar pertanyaan tentang penggunaan C3k2 setelah A2C2f
   # disini taruh a2c2f baru c3k2 aneh tidak?
-  - [-1, 2, C3k2, [1024, True]] # 20 (P5/32-large)
+  # Baris 47: Layer 20: C3k2 module dengan 1024 channel, diulang 2 kali - ini adalah output P5 untuk deteksi objek besar
+  - [-1, 4, C3k2, [1024, True]] # 20 (P5/32-large)
 
+  # Baris 48: Baris kosong untuk pemisah
+  # Baris 49: Layer 21: Detect layer yang mengambil output dari layer 14 (P3), 17 (P4), dan 20 (P5) untuk deteksi multi-scale
   - [[14, 17, 20], 1, Detect, [nc]] # Detect(P3, P4, P5)
 
 
+  # Baris 50: Baris kosong untuk pemisah
+  # Baris 51: Baris kosong untuk pemisah
+  # Baris 52: Komentar tag dengan nilai 0.867 (kemungkinan metric atau versi)
   #tag:  0.867
